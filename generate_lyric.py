@@ -226,6 +226,7 @@ def generate_samples(model, tokenizer, args, device):
                     logits = model(tokens, position_ids, attention_mask)
                     logits = logits[0][:, context_length - 1, :]
                 else:
+                    # 无限生成，滑动窗口，替换最后一个token，后面补上pad_id
                     for index, item in enumerate(tokens[0, 1:]):
                         tokens[0, index] = item
                     tokens[0, -1] = pad_id
@@ -240,6 +241,7 @@ def generate_samples(model, tokenizer, args, device):
                     tokens[0, context_length] = prev[0]
                     output_tokens_list += prev[0].tolist()
                 else:
+                    # 无限生成，滑动窗口
                     tokens[0, - 1] = prev[0]
                     output_tokens_list += prev[0].tolist()
                 torch.distributed.broadcast(tokens, mpu.get_model_parallel_src_rank(),
