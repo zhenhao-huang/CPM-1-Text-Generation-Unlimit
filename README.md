@@ -23,10 +23,12 @@
 
     pip install deepspeed
 ## 3 Use
-每个任务的生成脚本有两种，一个是基于**CPM**[**最初的生成代码**](https://github.com/TsinghuaAI/CPM-1-Generate/commit/2422770187eae8d498292b16f46bb9dac71c3631#diff-159073d23d683b271e9842fac43ac6da5e70d95a69f32b6238d88639138d933a)改的无限生成脚本，另一个是基于加入`past_key_values`的**CPM生成代码**改的无限生成脚本。**无限生成**具体做法为使用**滑动窗口**，循环替换最后一个`token`。
+每个任务的生成脚本有两种，一个是基于**CPM**[**最初的生成代码**](https://github.com/TsinghuaAI/CPM-1-Generate/commit/2422770187eae8d498292b16f46bb9dac71c3631#diff-159073d23d683b271e9842fac43ac6da5e70d95a69f32b6238d88639138d933a)改的无限生成脚本，另一个是基于加入`past_key_values`的**CPM生成代码**改的无限生成脚本。**无限生成**具体做法为使用**滑动窗口**，循环替换指定的`tokens`。
 
 使用了`past_key_values`后，可以**提高生成速度**。当使用`past_key_values`无限生成时，超过`1024`生成的文本会**完全不通顺**(暂时没解决)，所以建议使用**最初的代码无限生成**。
 ### 短文本(歌词)
+使用**动态滑动**窗口，打开`generate_lyric.py`、`generate_lyric_fast.py`中的相应注释即可。
+
 运行命令：
 
     bash scripts/lyric/generate_lyric.sh /model_path example.txt
