@@ -247,8 +247,9 @@ def generate_samples(model, tokenizer, args, device):
                                                     past_key_values=past_key_values, use_cache=True)
                     logits = logits[:, 0, :]
 
-                    # 无限生成，动态滑动窗口，替换一句话的tokens直到第一个eod，后面补上pad_id
+                    # 无限生成，动态滑动窗口，替换第一句的tokens直到eod，后面补上pad_id
                     # if tokens[0, -1].item() != pad_id:
+                    #     # 找到第一个<eod>的位置
                     #     eod_index = torch.nonzero(tokens[0] == args.eod_token)[0].item()
                     #     for index, item in enumerate(tokens[0, eod_index + 1:]):
                     #         tokens[0, index] = item
@@ -260,7 +261,7 @@ def generate_samples(model, tokenizer, args, device):
                     #                                 :args.seq_length - 1 - eod_index],
                     #                                 past_key_values=past_key_values, use_cache=True)
                     # logits = logits[:, 0, :]
-
+                    
                 if args.fp16:
                     past_key_values = [x.half() for x in past_key_values]
                 else:

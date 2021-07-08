@@ -233,6 +233,16 @@ def generate_samples(model, tokenizer, args, device):
                     logits = model(tokens, position_ids, attention_mask)
                     logits = logits[0][:, args.seq_length - 2, :]
 
+                    # 无限生成，动态滑动窗口，替换第一句的tokens直到eod，后面补上pad_id
+                    # if tokens[0, -1].item() != pad_id:
+                    #     # 找到第一个<eod>的位置
+                    #     eod_index = torch.nonzero(tokens[0] == args.eod_token)[0].item()
+                    #     for index, item in enumerate(tokens[0, eod_index + 1:]):
+                    #         tokens[0, index] = item
+                    #     tokens[0, - 1 - eod_index:] = pad_id
+                    # logits = model(tokens, position_ids, attention_mask)
+                    # logits = logits[0][:, args.seq_length - 2 - eod_index, :]
+
                 logits = top_k_logits(logits, top_k=args.top_k, top_p=args.top_p)
                 log_probs = F.softmax(logits / args.temperature, dim=-1)
                 prev = torch.multinomial(log_probs, num_samples=1)
@@ -243,6 +253,9 @@ def generate_samples(model, tokenizer, args, device):
                 else:
                     # 无限生成，滑动窗口
                     tokens[0, - 1] = prev[0]
+                    # 无限生成，动态滑动窗口
+                    # tokens[0, - 1 - eod_index] = prev[0]
+                    # eod_index -= 1
                     output_tokens_list += prev[0].tolist()
                 torch.distributed.broadcast(tokens, mpu.get_model_parallel_src_rank(),
                                             group=mpu.get_model_parallel_group())
